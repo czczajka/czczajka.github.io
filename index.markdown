@@ -4,5 +4,3 @@
 
 layout: home
 ---
-## Welcome to Czako blog page
-
