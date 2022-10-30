@@ -1,8 +1,7 @@
 ---
 layout: post
 title:  "Fibo IOT Raspberry Pi"
-date:   2022-06-16 00:12:24 +0100
-categories: jekyll update
+date:   2022-06-16 00:12:24 +0100s
 ---
 
 ## List of contents:
