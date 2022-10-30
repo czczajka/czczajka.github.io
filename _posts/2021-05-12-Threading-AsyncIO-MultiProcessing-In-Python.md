@@ -2,6 +2,7 @@
 layout: post
 title:  "Python threading/asyncio/multiprocessing overview"
 date:   2021-12-05 00:12:24 +0100
+categories: jekyll update
 ---
 
 ## List of contents:
