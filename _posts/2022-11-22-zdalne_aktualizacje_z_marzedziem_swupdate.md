@@ -1,33 +1,53 @@
 ---
 layout: post
-title:  "RZdalne aktualizacje oprogramowania z narzędziem SWUpdate"
+title:  "Zdalne aktualizacje oprogramowania z narzędziem SWUpdate"
 date:   2022-11-22 00:12:24 +0100
 categories: jekyll update
 ---
-## List of contents
 
 ## Kilka słów na początek...
 Wyobraz sobie ze wlasnie kupiles nowy sachochod. Nagle po dwoch miesiacach zostajesz pilnie wezwany do serwisu poniewaz Twoj nowy amochod jest wadliwy i musi dostac aktualizacje oprogramowania aby moc byc ponownie bezpiecznie uzytkowany. Nie jest jeszcze tak zle, wiele produktow nie ma wcale mozliwosci aktualizacji oprograwoania przez caly ich cykl zycia ale mogloby byc lepiej.
 
-Co w przypku kiedy aktualizacje mozna by wykonac zdalnie a Ty nawet moglbys o niej nie wiedziec i poprostu cieszyc sie swoim samochodem. Brzmi rozsadnie, nieprawdaz ? Tak to dziala w Twoim telefonie, nikt Cie nie wzywa na akcje serwisowe a caly czas dostajesz aktualizacje wszelakiej masci.
+Co w przypku kiedy aktualizacje mozna by wykonac zdalnie a Ty nawet moglbys o niej nie wiedziec i poprostu cieszyc sie swoim samochodem. Brzmi rozsadnie, nieprawdaz ? Tak to dziala w Twoim telefonie, nikt Cie nie wzywa na akcje serwisowe a caly czas dostajesz wszelakie aktualizacje.
 
-W atrykule chcialbym poruszyc temat aktualizacji urzadzen Linux Embedded. Jest to artykul raczej dla osob poczatkujacych. Przedstawione i omowione zostana w nim rozne rozne startegie aktualizacji oraz przyblizone zostanie narzedzie SWUpdate. Na koncu bedzie krotki przyklad  prostej aktualizacji raspberry pi 4 z wykorzystaniem SWUpdate.
+W atrykule chcialbym poruszyc temat zdalnych aktualizacji urzadzen Linux Embedded. Jest to artykul raczej dla osob poczatkujacych. Przedstawione i omowione zostana w nim rozne startegie aktualizacji oraz przyblizone zostanie narzedzie SWUpdate. Na koncu bedzie krotki przyklad  prostej aktualizacji płytki raspberry pi 4 z wykorzystaniem SWUpdate.
 
-czasem z roznych przyczyn urzadzenie Linux Embedded nie ma polaczenia z siecia Internet. W takim wypadku do pobrania aktualizacji mozna uzyc interfejsu USB, UART, SD. Choc w artykule skupie sie tylko na zdalnych aktualizacjach wiekszosc rozwazan bedzie  
+Czasem z roznych przyczyn urzadzenie Linux Embedded nie ma polaczenia z siecia Internet. W takim wypadku nie da się przeprowadzić aktualizacji zdalnie tylko trzeba użyć fo tego lokalnego interfejsu (USB, SD). W artykule skupie sie wyłącznie  na zdalnych aktualizacjach aczkowliek w przypaku większości poruszonych rozważań medium transmisyjne aktualizacji nie ma większego znaczenia.
 
 
-#### Single image delivery
-The main concept is that the manufacturer delivers a single big image. All single images are packed together (cpio was chosen for its simplicity and because can be streamed) together with an additional file (sw-description), that contains meta information about each single image.
+## Kilka słów o projekcie SWUpdate
+SWUpdate jest to 'Linux Update agent', który za główne zadanie ma Nam pomóc w przeprowadzeniu aktualizacji systemu Embedded Linux. Może zostać zainstalowany za pomocą komendy 'apt' bądz zbudowany ze źródeł. Projekt daje bardzo dużo różnych możliwości i dzięki niemu nie musimy wymyślać wsztkiego od nowa a możemy skorzystać z gotowego, dobrze przetestowanego narzędzia
 
-## Prerequisites
-- Raspberry Pi Board (I have Raspberry Pi 4B but there will be not many differences for other board version)
-- Host computer with MacOS or Linux system ()in tutorial MacOs has been used)
-- A litlle technical knowlegde and free time...
+Celem niniejszego tekstu nie jest dokładne omówienie frameworku, jak równiez opisywanie jego wszystkich możliwości, po więcej informacji zapraszam na strone internetową:
+https://sbabic.github.io/swupdate/swupdate.html
 
-## Setup environment
-1. Setup environment
-- flash a card with OS image (Raspberry Pi OS Lite 64-bit). It is important to prepare image with enabled ssh. I used Raspberry Pi Imager program to do that.
-- start board, connect to it  with ssh and install SWUpdate with apt or from sources. In tutorial second opotion has been choosen
+#### Pojedyńczy duży obraz
+Główną koncepcją projektu SWUpdate jest użycie do aktualizacji pojedyńczego dużego obrazu.
+![image-title](/assets/images/SWUpdate_image.png )
+
+Poszczególne pojedyńcze obrazy są spakowane (z pomocą cpio) razem z dodoatkowym plikiem (sw-description). Plik ten opisuje wszystlie komponenty zawarte w obrazie. Więcej na temat pliku będziemy mogli dowiedzieć się przechodząc w przykładach.
+
+## Strategie aktualizacji oprogramowania
+### Aktualizacja pojedyńczej aplikacji
+Polega na zaktualizowaniu pojedyńczej aplikacji. Najprostszym sposobem przeprowadzenia tego typu aktualizacji jest użycie polecenia scp i podmianę pojedyńczego pliku na dysku. Na początku chciałbym zacząć od zalet takiego rozwiązania. Przede wszystkim jest to mały rozmiar aktualizacji. Drugą istotną zaletą jest to, że zawzwyczaj po aktualizacji wystarczy ponownie uruchomić daną aplikacje a nie cały system operacyjny, aby zmiany zostały zauważone.
+Po zaktualizowaniu jednego pliku np. za pomocą polecenia scp mamy w gruncie do czynienia z nową wersją całego oprogramowania. Nikt nie powiedział, że nowa wersja aplikacji będzie działać tak samo z całym systemem jak wersja poprzednia, o ile w ogóle będzie działać. Tego typu podejście może prowadzić szybko do problemów z zależnościami i niespoójności oprogramowania. Kolejnym dużym ryzykiem jest 'popsucie' urządzenia. Jeżeli podczas aktualizacji np. zabraknie Nam prądu Nasze urządzenie może znaleźć się w bliżej nieokreślonym stanie i możemy starcić możliwość ponownej aktualizacji i naprawienia sytacji, przynajmniej zdalnie.
+
+Pomimo dość dużych wad tego pedejścia do aktualizowania oprogramowania jest ono używane dość często.Jest to najszybszy sposób i w przypadku projektów we wczesnej fazie rozwoju, gdzie niezawodnośc nie ogrywa kluczowej roli a urządzenie często mamy pod ręką, podejście sprawdza się idealnie. 
+
+### Przykład
+W przykładzie chciałbym pokazać aktualizacje pojedyńczego pliku/aplikacji na płytce Raspberry Pi z pomocą frameworku SWUpdate.
+Na potrzeby przykładu zostało użyte narzędzie SWUpdate z włączonym wsparciem sprawdzania sygnatury paczki. Dla ułatwienia można skompilować wersję narzędzia bez sprawdzenia sygnatury. 
+
+#### Wymagania
+- Raspberry Pi Board
+- Komputer z systemem Linux (ja używałem, Ubuntu 20.04. Ostatecznie można użyć do wszystkiego płytki Raspberry Pi)
+- Odrobina wiedzy technicznej i chwila wolnego czasu..
+
+
+#### Przygotowanie  środowiska
+- przygotowanie obrazu systemu Raspian (w przykładzie został użyty Raspberry Pi OS Lite 64-bit). Ważne, aby serwis ssh był domyślnie włączony.
+- zapisanie obrazu na karcie SD i zamontowanie jej w płytce
+- uruchomienie płytki, podłączenie się po ssh i zainstalowanie SWUpdate z użyciem komendy apt bądź z źródeł. W przykładzie druga opcja została wybrana
 {% highlight ruby %}
 #install from sources
 cd /home/pi
@@ -41,32 +61,31 @@ make && sudo make install
 sudo apt-get install swupdate
 {% endhighlight %}
 
-- create key pair (if enabled support for signed images) (on host)
+- przygotowanie pary kluczy (jeśli włączone wsparcie dla podpisywanych paczek) (on host)
 {% highlight ruby %}
 openssl genrsa -out swupdate-priv.pem
 openssl rsa -in swupdate-priv.pem -out swupdate-public.pem -outform PEM -pubout
 {% endhighlight %}
 
-- copy generated public key on the board
+- skopiowanie klucza publicznego na płytkę
 {% highlight ruby %}
 scp swupdate-public.pem  pi@raspberrypi.local:/home/pi/data/security/
 {% endhighlight %}
 
-- start SWUpdate (on embedded device)
+- uruchomienie SWUpdate (on embedded device)
 {% highlight ruby %}
 sudo swupdate -v -k /home/pi/data/security/swupdate-public.pem -w "-document_root /home/pi/swupdate/www"
 {% endhighlight %}
 
-Since we built SWUpdate with the web-server enabled we can now go to our browser and go to:
-http://raspberrypi.local:8080/, and we will be presented with this: 
+Teraz możemy uruchomić przeglądarkę i uruchomić stronę interfejsu webowego do SWUpdate:
+http://raspberrypi.local:8080/: 
 
+OBRAZ OBRAZ
 ....
 
-## Update single file
-As first update scenario I would like to consider update of single application. This kind of update is not recommended way but it can be used in some special cases. The main benefits are small size in comparision to whole OS image update and it not require to restart of device OS to aplly changes. The problem can arise when after start new software OS will crash. In that situation we cannot have mechanism to restore it in easy way i.e online.
+#### Aktualizacja pojedyńczego pliku, kroki do zrobienia
  
-### Steps to reproduce
-- create sw-description file
+- stworzenie pliku sw-description (host)
 {% highlight ruby %}
 software =
 {
@@ -84,19 +103,19 @@ software =
 }
 {% endhighlight %}
 
-- create upload file
+- stworzenie pliku aktualizacji (host)
 {% highlight ruby %}
 echo "SWUpdate v1" > SWUpdate
 √ repos % cat ~/workspace/SWUpdate 
 SWUpdate v1
 {% endhighlight %}
 
-- sign the package
+- podpisanie paczki (host)
 {% highlight ruby %}
 openssl dgst -sha256 -sign ~/swupdate-priv.pem sw-description > sw-description.sig
 {% endhighlight %}
 
-- Create an cpio archive (not worked in my case on MacOS, I did commands from this point on raspberry board)
+- Stworzenie archiwum cpio (host)
 {% highlight ruby %}
 export FILES="sw-description sw-description.sig SWUpdate"
 
@@ -106,16 +125,18 @@ SWUpdate
 2 blocks
 {% endhighlight %}
 
-- Update board with via webinterface. File to upload: update-image-v1.swu
+- Zaktualizowanie płytki z pomocą interfejsu webowego. Wybierz plik: update-image-v1.swu
 ![image-title](/assets/images/SWUpdate_success.png)
 
-- Verify updated file
+- VWeryfikacja ręczna czy plik został zatualizowany
 {% highlight ruby %}
 pi@raspberrypi:~ $ sudo cat /tmp/SWUpdate 
 SWUpdate v1
 {% endhighlight %}
 
-As you can see one step above,file has been updated. As additional task you can try to upload package with wrong signagurea nd see what happend in that scenario ;)
+Jak można zauważyć plik został zaktualizowany pomyślnie. W ramach ćwiczeń proponuje wysłać paczkę aktualizacyjną bez lub z niepoprawną sygnaturą i zobaczyć jaki dostaniemy komunikat.
+ 
+Hardware compatibility checking
 
 ## Update whole OS image
 OS image for embedded device can be often considered as single applications whose individual parts cannot be changed. As example you can image the situation when you provided image for embedded device and later with OS can be updated with help of apt-get command. After updates performed this way OS is different than initial delivered image. Developer can not guarantee that this new image will be work properly becuase it was never tested in that configuration. Maybe after update of some application whole device will not work as expected. Searching of bugs in this kind of customized original image can be nightmare because we never know with which configuration we work.      
