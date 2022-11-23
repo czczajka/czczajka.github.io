@@ -6,21 +6,15 @@ categories: jekyll update
 ---
 ## List of contents
 
-## A few words at the beginning...
-You can image yourself the situation when you had bought a new car and after some time you received the information that you need go to the service because your lovely new car require service action. It's not very bad, a lot of devices don't have possiblity for any update during their lifecycle, but it can be better. What in case when whole proccess will be performed autoamatically and you don't go anywhere and even don't know that something has been changed in your car software. Nowadays software updates 'on-demand' semms to be very important part of product lifecycle. It is better for users and developers when device is updateable in some easy way.
+## Kilka słów na początek...
+Wyobraz sobie ze wlasnie kupiles nowy sachochod. Nagle po dwoch miesiacach zostajesz pilnie wezwany do serwisu poniewaz Twoj nowy amochod jest wadliwy i musi dostac aktualizacje oprogramowania aby moc byc ponownie bezpiecznie uzytkowany. Nie jest jeszcze tak zle, wiele produktow nie ma wcale mozliwosci aktualizacji oprograwoania przez caly ich cykl zycia ale mogloby byc lepiej.
 
-Updates can be categorized according to many different criteria. The first one is update medium. Sometimes from secuirity reasons device can not be online and one way to update it is do that with i.e USB or SDcard. However, if there are no obstacles to be online remote updates can be used. I would like focus in this article on remote updates but many of the issues discussed here will be true for offline updates.
+Co w przypku kiedy aktualizacje mozna by wykonac zdalnie a Ty nawet moglbys o niej nie wiedziec i poprostu cieszyc sie swoim samochodem. Brzmi rozsadnie, nieprawdaz ? Tak to dziala w Twoim telefonie, nikt Cie nie wzywa na akcje serwisowe a caly czas dostajesz aktualizacje wszelakiej masci.
 
-The main aim of article is to discuss the topic of updating embedded devices. The article is in form of tutorial, which presents different ways to update raspberry pi 4 board and by the way disscuss a few aspects and problems related with updates. I didn't want to do everything from scratch and I decided to use of open source framework named SWUpdate. In article topics like will be covered:
-* update both entire images and individual applications
-* rollback mechanism
-* secuirity 
-* SWUpdate yocto integration
+W atrykule chcialbym poruszyc temat aktualizacji urzadzen Linux Embedded. Jest to artykul raczej dla osob poczatkujacych. Przedstawione i omowione zostana w nim rozne rozne startegie aktualizacji oraz przyblizone zostanie narzedzie SWUpdate. Na koncu bedzie krotki przyklad  prostej aktualizacji raspberry pi 4 z wykorzystaniem SWUpdate.
 
-## What is SWUpdate ?
-The aim of the project is to help update an embedded systems from a storage media or from network. It should be considerd as a framework, where handlers or installers, can be easy customizable. The framework has great potential and many options. Not of them will be disscussed here. To get more knowledge about Sproject please vist their website.
+czasem z roznych przyczyn urzadzenie Linux Embedded nie ma polaczenia z siecia Internet. W takim wypadku do pobrania aktualizacji mozna uzyc interfejsu USB, UART, SD. Choc w artykule skupie sie tylko na zdalnych aktualizacjach wiekszosc rozwazan bedzie  
 
-The most common usage of SWUpdate is to do image based updates using a “Single Copy” or a “Dual Copy” strategy. SWUpdate does support updating single files on you root file-system or other partitions
 
 #### Single image delivery
 The main concept is that the manufacturer delivers a single big image. All single images are packed together (cpio was chosen for its simplicity and because can be streamed) together with an additional file (sw-description), that contains meta information about each single image.
