@@ -6,68 +6,79 @@ categories: jekyll update
 ---
 
 ## Kilka słów na początek...
-Wyobraz sobie ze wlasnie kupiles nowy sachochod. Nagle po dwoch miesiacach zostajesz pilnie wezwany do serwisu poniewaz Twoj nowy amochod jest wadliwy i musi dostac aktualizacje oprogramowania aby moc byc ponownie bezpiecznie uzytkowany. Nie jest jeszcze tak zle, wiele produktow nie ma wcale mozliwosci aktualizacji oprograwoania przez caly ich cykl zycia ale mogloby byc lepiej.
+W atrykule chciałbym poruszyć temat zdalnych aktualizacji urządzeń Linux Embedded. Przedstawione w nim zostanie narzędzie SWUpdate oraz przy okazji omówione zostaną podstawowe startegie aktualizacji. Pokazany zostanie również przyklad prostej aktualizacji na płytce raspberry pi 4 z wykorzystaniem SWUpdate.
 
-Co w przypku kiedy aktualizacje mozna by wykonac zdalnie a Ty nawet moglbys o niej nie wiedziec i poprostu cieszyc sie swoim samochodem. Brzmi rozsadnie, nieprawdaz ? Tak to dziala w Twoim telefonie, nikt Cie nie wzywa na akcje serwisowe a caly czas dostajesz wszelakie aktualizacje.
+Czasem z rożnych przyczyn urządzenie Linux Embedded nie ma połączenia z siecią Internet. W takim wypadku nie da się przeprowadzić aktualizacji zdalnie tylko trzeba użyć do tego lokalnego interfejsu (USB, SD). W artykule skupie sie wyłącznie na zdalnych aktualizacjach, aczkowliek w przypaku większości poruszonych rozważań medium transmisyjne aktualizacji nie ma większego znaczenia.
 
-W atrykule chcialbym poruszyc temat zdalnych aktualizacji urzadzen Linux Embedded. Jest to artykul raczej dla osob poczatkujacych. Przedstawione i omowione zostana w nim rozne startegie aktualizacji oraz przyblizone zostanie narzedzie SWUpdate. Na koncu bedzie krotki przyklad  prostej aktualizacji płytki raspberry pi 4 z wykorzystaniem SWUpdate.
-
-Czasem z roznych przyczyn urzadzenie Linux Embedded nie ma polaczenia z siecia Internet. W takim wypadku nie da się przeprowadzić aktualizacji zdalnie tylko trzeba użyć fo tego lokalnego interfejsu (USB, SD). W artykule skupie sie wyłącznie  na zdalnych aktualizacjach aczkowliek w przypaku większości poruszonych rozważań medium transmisyjne aktualizacji nie ma większego znaczenia.
-
+Motywacją do napisania artykułu były dla mnie dotychczasowe doświadczenia związane z aktualizacją softu na urządzeniach embedded, które często polegały na wykonaniu 'skryptów' napisanych wcześniej przez programistów. Czasem łatwiej nie tworzyć koła na nowo i można użyć gotowych, dobrze udokumentowanych i przetestowanych rozwiązań. Jest to artykuł raczej dla osób początkujących i ma głównie na celu pokazać czytelnikowi, że istnieje alternatywa dla skryptów oraz przybliżyć narzędzie SWupdate.
 
 ## Kilka słów o projekcie SWUpdate
-SWUpdate jest to 'Linux Update agent', który za główne zadanie ma Nam pomóc w przeprowadzeniu aktualizacji systemu Embedded Linux. Może zostać zainstalowany za pomocą komendy 'apt' bądz zbudowany ze źródeł. Projekt daje bardzo dużo różnych możliwości i dzięki niemu nie musimy wymyślać wsztkiego od nowa a możemy skorzystać z gotowego, dobrze przetestowanego narzędzia
+SWUpdate jest to 'Linux Update agent', który za główne zadanie ma Nam pomóc w przeprowadzeniu aktualizacji systemu Embedded Linux. Może zostać zainstalowany za pomocą komendy 'apt' bądz zbudowany ze źródeł. Projekt daje bardzo dużo różnych możliwości i dzięki niemu nie musimy wymyślać wsztkiego od nowa a możemy skorzystać z gotowego, dobrze przetestowanego narzędzia.
 
-Celem niniejszego tekstu nie jest dokładne omówienie frameworku, jak równiez opisywanie jego wszystkich możliwości, po więcej informacji zapraszam na strone internetową:
-https://sbabic.github.io/swupdate/swupdate.html
+Główne funkcjonalności:
+- obsługa wielu nośników danych za pomocą różnych handlerów (eMMC, SD, Raw NAND, NOR and SPI-NOR flashes)
+- wsparcie wielu interfejsów do pobrania aktualizacji (USB, SD, UART ..)
+- możliwość dodawania własnych handlerów
+- elastyczny format pliku aktualizacji
+- wsparcie aktualizacji wielu komponentów za pomocą pojedyńczego pliku obrazu (swu)
+- wsparcie dla zdalnych aktualizacji (OTA support)
+- zintegrowany web serwer
+- integracja z Hawkbit
+- obsługa zaszyfrowanych/podpisanych aktualizacji
+- i wiele wiele innych
+
+Celem niniejszego tekstu nie jest dokładne omówienie frameworku, jak równiez opisywanie jego wszystkich możliwości, po więcej informacji zapraszam na strone internetową projektu:
+[link](https://sbabic.github.io/swupdate/swupdate.html)
 
 #### Pojedyńczy duży obraz
 Główną koncepcją projektu SWUpdate jest użycie do aktualizacji pojedyńczego dużego obrazu.
 ![image-title](/assets/images/SWUpdate_image.png )
 
-Poszczególne pojedyńcze obrazy są spakowane (z pomocą cpio) razem z dodoatkowym plikiem (sw-description). Plik ten opisuje wszystlie komponenty zawarte w obrazie. Więcej na temat pliku będziemy mogli dowiedzieć się przechodząc w przykładach.
+Poszczególne pojedyńcze obrazy są spakowane (z pomocą cpio) razem z dodatkowym plikiem (sw-description). Plik ten opisuje wszystlie komponenty zawarte w obrazie. Więcej na temat pliku będziemy mogli dowiedzieć się w przykładach.
 
 ## Strategie aktualizacji oprogramowania
 ### Aktualizacja pojedyńczej aplikacji
-Polega na zaktualizowaniu pojedyńczej aplikacji. Najprostszym sposobem przeprowadzenia tego typu aktualizacji jest użycie polecenia scp i podmianę pojedyńczego pliku na dysku. Na początku chciałbym zacząć od zalet takiego rozwiązania. Przede wszystkim jest to mały rozmiar aktualizacji. Drugą istotną zaletą jest to, że zawzwyczaj po aktualizacji wystarczy ponownie uruchomić daną aplikacje a nie cały system operacyjny, aby zmiany zostały zauważone.
-Po zaktualizowaniu jednego pliku np. za pomocą polecenia scp mamy w gruncie do czynienia z nową wersją całego oprogramowania. Nikt nie powiedział, że nowa wersja aplikacji będzie działać tak samo z całym systemem jak wersja poprzednia, o ile w ogóle będzie działać. Tego typu podejście może prowadzić szybko do problemów z zależnościami i niespoójności oprogramowania. Kolejnym dużym ryzykiem jest 'popsucie' urządzenia. Jeżeli podczas aktualizacji np. zabraknie Nam prądu Nasze urządzenie może znaleźć się w bliżej nieokreślonym stanie i możemy starcić możliwość ponownej aktualizacji i naprawienia sytacji, przynajmniej zdalnie.
+Polega na zaktualizowaniu pojedyńczej aplikacji. Najprostszym sposobem przeprowadzenia tego typu aktualizacji jest użycie polecenia scp i podmianę pojedyńczego pliku na dysku.
 
-Pomimo dość dużych wad tego pedejścia do aktualizowania oprogramowania jest ono używane dość często.Jest to najszybszy sposób i w przypadku projektów we wczesnej fazie rozwoju, gdzie niezawodnośc nie ogrywa kluczowej roli a urządzenie często mamy pod ręką, podejście sprawdza się idealnie. 
+Na początku chciałbym zacząć od zalet takiego rozwiązania. Przede wszystkim jest to mały rozmiar aktualizacji. Drugą istotną zaletą jest to, że zazwyczaj po aktualizacji wystarczy ponownie uruchomić daną aplikacje a nie cały system operacyjny, aby zmiany zostały zauważone.
 
-### Przykład
-W przykładzie chciałbym pokazać aktualizacje pojedyńczego pliku/aplikacji na płytce Raspberry Pi z pomocą frameworku SWUpdate.
+Po zaktualizowaniu jednego pliku np. za pomocą polecenia scp mamy w gruncie do czynienia z nową wersją całego oprogramowania. Nikt nie powiedział, że nowa wersja aplikacji będzie działać tak samo z całym systemem jak wersja poprzednia, o ile w ogóle będzie działać. Tego typu podejście może prowadzić szybko do problemów z zależnościami i niespoójności oprogramowania. Kolejnym dużym ryzykiem jest 'popsucie' urządzenia. Jeżeli podczas aktualizacji np. zabraknie Nam prądu Nasze urządzenie może znaleźć się w bliżej nieokreślonym stanie i możemy starcić możliwość ponownej aktualizacji i naprawienia sytuacji, przynajmniej zdalnie.
+
+Pomimo sporych wad tego pedejścia do aktualizowania oprogramowania jest ono używane dość często. Jest to najszybszy sposób i w przypadku projektów we wczesnej fazie rozwoju, gdzie niezawodnośc nie ogrywa kluczowej roli a urządzenie często mamy pod ręką, podejście sprawdza się idealnie. 
+
+#### Przykład 1 - aktualizacje pojedyńczego pliku
 Na potrzeby przykładu zostało użyte narzędzie SWUpdate z włączonym wsparciem sprawdzania sygnatury paczki. Dla ułatwienia można skompilować wersję narzędzia bez sprawdzenia sygnatury. 
 
-#### Wymagania
+##### Wymagania
 - Raspberry Pi Board
-- Komputer z systemem Linux (ja używałem, Ubuntu 20.04. Ostatecznie można użyć do wszystkiego płytki Raspberry Pi)
-- Odrobina wiedzy technicznej i chwila wolnego czasu..
+- komputer z systemem Linux (ja używałem Ubuntu 20.04, ostatecznie można użyć do wszystkiego płytki Raspberry Pi)
+- odrobina wiedzy technicznej i chwila wolnego czasu
 
 
-#### Przygotowanie  środowiska
+##### Przygotowanie  środowiska
 - przygotowanie obrazu systemu Raspian (w przykładzie został użyty Raspberry Pi OS Lite 64-bit). Ważne, aby serwis ssh był domyślnie włączony.
 - zapisanie obrazu na karcie SD i zamontowanie jej w płytce
-- uruchomienie płytki, podłączenie się po ssh i zainstalowanie SWUpdate z użyciem komendy apt bądź z źródeł. W przykładzie druga opcja została wybrana
+- uruchomienie płytki, podłączenie się po ssh i zainstalowanie SWUpdate z użyciem komendy apt bądź ze źródeł. W przykładzie została wybrana druga opcja.
 {% highlight ruby %}
 #install from sources
 cd /home/pi
 sudo apt-get install lua5.2-dev libssl-dev libconfig-dev libarchive-dev libzmq3-dev libz-dev libcurl4-gnutls-dev libjson-c-dev
-#TODO Is this branch needed, error with duplicated case
-git clone https://github.com/sbabic/swupdate.git -b 2017.11 && cd swupdate
+git clone https://github.com/sbabic/swupdate.git && cd swupdate
 make test_defconfig
+// Optionally: make menuconfig
 make && sudo make install
 
 #install with apt
 sudo apt-get install swupdate
 {% endhighlight %}
 
-- przygotowanie pary kluczy (jeśli włączone wsparcie dla podpisywanych paczek) (on host)
+- przygotowanie pary kluczy (jeśli zostało włączone wsparcie dla podpisywanych paczek) (host)
 {% highlight ruby %}
 openssl genrsa -out swupdate-priv.pem
 openssl rsa -in swupdate-priv.pem -out swupdate-public.pem -outform PEM -pubout
 {% endhighlight %}
 
-- skopiowanie klucza publicznego na płytkę
+- skopiowanie klucza publicznego na płytkę (host)
 {% highlight ruby %}
 scp swupdate-public.pem  pi@raspberrypi.local:/home/pi/data/security/
 {% endhighlight %}
@@ -78,14 +89,15 @@ sudo swupdate -v -k /home/pi/data/security/swupdate-public.pem -w "-document_roo
 {% endhighlight %}
 
 Teraz możemy uruchomić przeglądarkę i uruchomić stronę interfejsu webowego do SWUpdate:
-http://raspberrypi.local:8080/: 
+http://raspberrypi.local:8080
 
-OBRAZ OBRAZ
-....
+![image-title](/assets/images/SWUpdate_start.png)
 
-#### Aktualizacja pojedyńczego pliku, kroki do zrobienia
+##### Kroki do zrobienia
  
 - stworzenie pliku sw-description (host)
+
+
 {% highlight ruby %}
 software =
 {
@@ -106,7 +118,7 @@ software =
 - stworzenie pliku aktualizacji (host)
 {% highlight ruby %}
 echo "SWUpdate v1" > SWUpdate
-√ repos % cat ~/workspace/SWUpdate 
+cat ~/workspace/SWUpdate 
 SWUpdate v1
 {% endhighlight %}
 
@@ -115,7 +127,7 @@ SWUpdate v1
 openssl dgst -sha256 -sign ~/swupdate-priv.pem sw-description > sw-description.sig
 {% endhighlight %}
 
-- Stworzenie archiwum cpio (host)
+- stworzenie archiwum cpio (host)
 {% highlight ruby %}
 export FILES="sw-description sw-description.sig SWUpdate"
 
@@ -125,10 +137,10 @@ SWUpdate
 2 blocks
 {% endhighlight %}
 
-- Zaktualizowanie płytki z pomocą interfejsu webowego. Wybierz plik: update-image-v1.swu
+- zaktualizowanie płytki z pomocą interfejsu webowego. Wybierz plik: update-image-v1.swu
 ![image-title](/assets/images/SWUpdate_success.png)
 
-- VWeryfikacja ręczna czy plik został zatualizowany
+- weryfikacja ręczna czy plik został zatualizowany (rp4)
 {% highlight ruby %}
 pi@raspberrypi:~ $ sudo cat /tmp/SWUpdate 
 SWUpdate v1
@@ -136,41 +148,61 @@ SWUpdate v1
 
 Jak można zauważyć plik został zaktualizowany pomyślnie. W ramach ćwiczeń proponuje wysłać paczkę aktualizacyjną bez lub z niepoprawną sygnaturą i zobaczyć jaki dostaniemy komunikat.
  
-Hardware compatibility checking
+#### Przyklad 2 - hardware compatibility
+Jedną z opcji jakie umożliwia Nam framework SWUpdate jest sprawdzenie kompatybilności aktualizacji ze sprzętem na którym ma zostać zainstalowana. Na urządzeniu Linux Embedded musimy stworzyć plik /etc/hwrevision (sciezka może być inna, ale wtedy trzeba powiedzieć o tym SWUpdate podczas uruchamiania poprzez parametr). Plik ten opisuje rewizje hardwaru jaki posiadamy. W moim przypadku plik wygląda nastepujaco:
+{% highlight ruby %}
+pi@raspberrypi:~ $ cat /etc/hwrevision 
+raspberrypi 1.0
+{% endhighlight %}
 
-## Update whole OS image
-OS image for embedded device can be often considered as single applications whose individual parts cannot be changed. As example you can image the situation when you provided image for embedded device and later with OS can be updated with help of apt-get command. After updates performed this way OS is different than initial delivered image. Developer can not guarantee that this new image will be work properly becuase it was never tested in that configuration. Maybe after update of some application whole device will not work as expected. Searching of bugs in this kind of customized original image can be nightmare because we never know with which configuration we work.      
-Because that reasons the common way for embedded devices is to do update whole image instead of particular files/applications. Main disadvantage of those solution is update size. Whole image is normally bigger than one file/app.
+Kolejnym krokiem jest dodanie w pliku sw-description rewizji hardwar-u, dla ktorych przeznaczona jest aktualizacja:
+{% highlight ruby %}
+software =
+{
+    version = "1.0.1";
+    raspberrypi = {
+        hardware-compatibility: [ "1.0" ];
+        ....
+{% endhighlight %}
 
-We can distinguish the following types of OS image updates:
+W przypadku kiedy aktualizacja nie będzie pasować do rewizji sprzętu, nie zostanie ona zainstalowana a my zostaniemy o tym poinformowani w dość przejrzysty sposób co poszlo nie tak:
+![image-title](/assets/images/SWUpdate_hwrevision.png)
+
+
+## Aktualizacje pelnego obrazu systemu
+Kolejną strategią aktualizacji jest aktualizacja nie pojedyńczego pliku czy aplikacji a całego systemu. Dostarczając pełen obraz systemu nie musimy sie martwić spójnością oprogramowania ponieważ dostarczamy oprogramowanie w danej konfiguracji ktora została przez Nas wcześniej przetestowana. Kolejna zaletą jest to, że jeśli Nasza aktualizacja się nie uda, albo co gorsza zabraknie zasilania w samym srodku aktualizacji mamy dostępne mechanizmy, ktore pomogą nam wyjść z opresji. Jej najwiekszą wadą jest rozmiar przesyłanej paczki. Może być to szczególnie problemem kiedy mamy ograniczone mozliwosci w zakresie transferu danych. To podejście wymaga od Nas trochę więcej wiedzy (bootloader itp), pracy oraz czasu.
+
+Możemy wyrożnić tutaj trzy różne podejścia:
 - single copy
 - dual copy
-- diffrential way
+- differential update
 
-In this tutorial i would like to focus on dual copy mode only.
+### Dual copy
+Partycjonowanie urządzenia wygląda następująco:
 
-### Dual copy update
-In dual copy update the device partitioning look like this:
+| Bootloader | Podstawowy OS (aktywny) | Podstawowy OS (nieaktywny) | Partycja danych |
 
-| BOOTLOADER | OS (active) | OS (inactive) | PERSISTENT DATA |
+Można zauważyć, że w przypadku strategii Dual Copy mamy dwie partycje zawierające system operacyjny. W danej chwili aktywny jest tylko jeden OS, drugi pozostaje niekatywny.
 
-Can be noticed that we have two OS. One is active and the second one is inactive.
-Dual copy update in shortcut contains following steps:
-- checking for new updates
-- download update to inactive OS
-- reboot device and mark inactive OS (updated) as active OS
+Zasada działania aktualizacji jest bardzo prosta. Urządzenie odpytuje się o dostępne aktualizacje. Kiedy otrzyma pozytywną odpowiedź to pobiera nowy obraz i zapisuje go na niekatywnej partycji. W kolejnym kroku urządzenie musi zostać uruchomione ponownie z nową zapisaną partycją oznaczoną jako aktywna.
 
-Now we will pass through simple example of dual copy mode.
+Tym sposobem doszliśmy do zalet tego podejścia. W przypadku kiedy nowo zapisany obraz systemu nie uruchamia się poprawnie zawsze możemy powrocić do poprzedniej wersji i zrobić ją aktywną. Kiedy podczas aktualizacji zabraknie nam zasilania urządzenie nadal będzie mogło korzystać ze 'starego' obrazu systemu i ponowić próbę aktualizacji. Plusem jest rownież to, że nie potrzebujemy żadnej interakcji z użytkownikiem ponieważ wszystkie operacje związane z aktualizacją mogą zostać wykonane w tle.
 
-git clone git://git.yoctoproject.org/poky -b rocko
-git clone https://github.com/openembedded/meta-openembedded.git -b rocko
-git clone https://github.com/sbabic/meta-swupdate -b rocko
-git clone https://github.com/sbabic/meta-swupdate-boards.git -b master
-git clone https://github.com/agherzan/meta-raspberrypi.git -b rocko
+Wadą rozwiązania jest ilość potrzebnego miejsca. Można powiedzieć, ze potrzebujemy dwa razy tyle miejsca na dysku jak w przypadku aktualizacji pojedynczej aplikacji. Pewną niedogodnoscią może być rownież to, ze wymagane jest ponowne uruchomienie urządzenia.
 
-greadlink -f layers/poky/oe-init-build-env build
-brew install coreutils
+### Single Copy
+Partcjonowanie urządzenia wygląda nastepujaco:
 
+| Bootloader | Podstawowy OS (aktywny)| Recovery OS| Partycja danych |
 
+Podstawową rożnicą między startegią single copy a dual copy jest to, że w przypadku tej pierwszej używamy Recovery OS zamiast drugiej partycji z pełnym OS. Recovery OS jest to minimalny obraz systemu z którego można wystartować urządzenie oraz dostarcza możliwość zainstalowania aktualizacji.
 
+Aktualizacja można podzielić na następujace kroki. Urządzenie odpytuje się o dostępne aktualizacje i jeśli takową znajdzie pobiera obraz i zapisuje go na partycji danych. Nastepnie prosi uzytkownika o rozpoczęcie instalowania aktualizacji. W kolejnym kroku urządzenie zostaje uruchomione z Recovery OS, a pobrany wcześniej obraz nadpisuje Regular OS. Na koniec pozostaje uruchomić urządzenie ładujac podstawowy obraz systemu.
 
+Jest niestety kilka istotnych wad tego podejscia. Potrzebujemy sporo miejsca na partycji danych ponieważ obraz musi zostac gdzieś pobrany. Urządzenie przez czas instalowania aktualizacji pozostaje niaktywne. W razie nieudanej aktualizacji pozostajemy z urzadzeniem w trybie recovery, ale z dobrych stron możemy spróbowac zainstalowac aktualizacje jeszcze raz. Niestety nie mozemy pobrać obrazu jeszcze raz bo ten krok jest wykonanywany przy uzyciu podstawowego OS a nie recovery. W takim wypadku jeśli wcześniej pobrany obraz jest w jakiś sposob uszkodzony, bedziemy musieli podjąć się manualnej naprawy problemu.
+
+### Differential update
+Jest to rodzaj aktualizacji który rozwiązuje problem z jej wielkością. Polega no pobieraniu i zapisywaniu różnic między starym a nowym obrazem. Nie będę sie tutaj więcej rozpisywał ponieważ jest to dość obszerny temat. Po więcej informacji zapraszam na stronę: [link](https://sbabic.github.io/swupdate/delta-update.html)
+
+### Podsumowanie
+Framework SWUpdate pozwala Nam podejść do aktualizacji w prosty i usystemtyzowany sposób. Dostarcza on Nam wiele ciekawych możliwości o których byłoby warto jeszcze wspomnieć. Szczerze mówiąc, zagadnienia poruszone w artykule są tylko małym skrawkiem wszystkich możliwości frameworku. Warto byłoby wspomnieć, najlepiej na przykładzie, o aktualizacji z wykorzystaniem pełnego obrazu systemu. Kolejnym ciekawym zagadnieniem jest integracja z serwerem HawkBit (serwer aktualizacji). Integracja ta pozwala Nam stworzyć kompleksowy system do zarządzania aktualizacjami. Podsumowując, zostaje jeszcze dużo ciekawych zagadnień którym można by sie przyjrzeć bardziej szczegółowo. Jak już wcześniej wspomniałem, główną motywacją do napisania artykułu było jednak przedstawienie narzędzia SWUpdate oraz przybliżenie różnych strategii aktualizacji i myślę, że to jest DONE.
