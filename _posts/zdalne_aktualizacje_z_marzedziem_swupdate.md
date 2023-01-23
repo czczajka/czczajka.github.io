@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "Zdalne aktualizacje oprogramowania z narzędziem SWUpdate"
-date:   2022-11-22 00:12:24 +0100
+title:  "SWUpdate, czyli o aktualizacjach oprogramowania w świecie Embedded Linux"
+date:   2023-01-22 12:00:00 +0100
 categories: jekyll update
 ---
 
@@ -42,20 +42,20 @@ Polega na zaktualizowaniu pojedyńczej aplikacji. Najprostszym sposobem przeprow
 
 Na początku chciałbym zacząć od zalet takiego rozwiązania. Przede wszystkim jest to mały rozmiar aktualizacji. Drugą istotną zaletą jest to, że zazwyczaj po aktualizacji wystarczy ponownie uruchomić daną aplikacje a nie cały system operacyjny, aby zmiany zostały zauważone.
 
-Po zaktualizowaniu jednego pliku np. za pomocą polecenia scp mamy w gruncie do czynienia z nową wersją całego oprogramowania. Nikt nie powiedział, że nowa wersja aplikacji będzie działać tak samo z całym systemem jak wersja poprzednia, o ile w ogóle będzie działać. Tego typu podejście może prowadzić szybko do problemów z zależnościami i niespoójności oprogramowania. Kolejnym dużym ryzykiem jest 'popsucie' urządzenia. Jeżeli podczas aktualizacji np. zabraknie Nam prądu Nasze urządzenie może znaleźć się w bliżej nieokreślonym stanie i możemy starcić możliwość ponownej aktualizacji i naprawienia sytuacji, przynajmniej zdalnie.
+Po zaktualizowaniu jednego pliku np. za pomocą polecenia scp mamy w gruncie rzeczy do czynienia z nową wersją całego oprogramowania. Nikt nie powiedział, że nowa wersja aplikacji będzie działać tak samo z całym systemem jak wersja poprzednia, o ile w ogóle będzie działać. Tego typu podejście może prowadzić szybko do problemów z zależnościami i niespoójności oprogramowania. Kolejnym dużym ryzykiem jest 'popsucie' urządzenia. Jeżeli podczas aktualizacji np. zabraknie Nam prądu Nasze urządzenie może znaleźć się w bliżej nieokreślonym stanie i możemy starcić możliwość ponownej aktualizacji i naprawienia sytuacji, przynajmniej zdalnie.
 
-Pomimo sporych wad tego pedejścia do aktualizowania oprogramowania jest ono używane dość często. Jest to najszybszy sposób i w przypadku projektów we wczesnej fazie rozwoju, gdzie niezawodnośc nie ogrywa kluczowej roli a urządzenie często mamy pod ręką, podejście sprawdza się idealnie. 
+Pomimo sporych wad tego podejścia do aktualizowania oprogramowania jest ono używane dość często. Jest to najszybszy sposób i w przypadku projektów we wczesnej fazie rozwoju, gdzie niezawodnośc nie ogrywa kluczowej roli a urządzenie często mamy pod ręką, podejście sprawdza się idealnie. 
 
-#### Przykład 1 - aktualizacje pojedyńczego pliku
+#### **Przykład 1 - aktualizacje pojedyńczego pliku**
 Na potrzeby przykładu zostało użyte narzędzie SWUpdate z włączonym wsparciem sprawdzania sygnatury paczki. Dla ułatwienia można skompilować wersję narzędzia bez sprawdzenia sygnatury. 
 
-##### Wymagania
+#### Wymagania
 - Raspberry Pi Board
 - komputer z systemem Linux (ja używałem Ubuntu 20.04, ostatecznie można użyć do wszystkiego płytki Raspberry Pi)
 - odrobina wiedzy technicznej i chwila wolnego czasu
 
 
-##### Przygotowanie  środowiska
+#### Przygotowanie środowiska
 - przygotowanie obrazu systemu Raspian (w przykładzie został użyty Raspberry Pi OS Lite 64-bit). Ważne, aby serwis ssh był domyślnie włączony.
 - zapisanie obrazu na karcie SD i zamontowanie jej w płytce
 - uruchomienie płytki, podłączenie się po ssh i zainstalowanie SWUpdate z użyciem komendy apt bądź ze źródeł. W przykładzie została wybrana druga opcja.
@@ -93,7 +93,7 @@ http://raspberrypi.local:8080
 
 ![image-title](/assets/images/SWUpdate_start.png)
 
-##### Kroki do zrobienia
+#### Aktualizacja, kroki do zrobienia
  
 - stworzenie pliku sw-description (host)
 
@@ -148,14 +148,14 @@ SWUpdate v1
 
 Jak można zauważyć plik został zaktualizowany pomyślnie. W ramach ćwiczeń proponuje wysłać paczkę aktualizacyjną bez lub z niepoprawną sygnaturą i zobaczyć jaki dostaniemy komunikat.
  
-#### Przyklad 2 - hardware compatibility
-Jedną z opcji jakie umożliwia Nam framework SWUpdate jest sprawdzenie kompatybilności aktualizacji ze sprzętem na którym ma zostać zainstalowana. Na urządzeniu Linux Embedded musimy stworzyć plik /etc/hwrevision (sciezka może być inna, ale wtedy trzeba powiedzieć o tym SWUpdate podczas uruchamiania poprzez parametr). Plik ten opisuje rewizje hardwaru jaki posiadamy. W moim przypadku plik wygląda nastepujaco:
+#### **Przyklad 2 - hardware compatibility**
+Jedną z opcji jakie umożliwia Nam framework SWUpdate jest sprawdzenie kompatybilności aktualizacji ze sprzętem na którym ma zostać zainstalowana. Na urządzeniu Linux Embedded musimy stworzyć plik /etc/hwrevision (sciezka może być inna, ale wtedy trzeba powiedzieć o tym SWUpdate podczas uruchamiania poprzez parametr). Plik ten opisuje rewizje hardwaru jaki posiadamy. W moim przypadku plik wygląda następująco:
 {% highlight ruby %}
 pi@raspberrypi:~ $ cat /etc/hwrevision 
 raspberrypi 1.0
 {% endhighlight %}
 
-Kolejnym krokiem jest dodanie w pliku sw-description rewizji hardwar-u, dla ktorych przeznaczona jest aktualizacja:
+Kolejnym krokiem jest dodanie w pliku sw-description rewizji hardwaru, dla których przeznaczona jest aktualizacja:
 {% highlight ruby %}
 software =
 {
@@ -165,12 +165,12 @@ software =
         ....
 {% endhighlight %}
 
-W przypadku kiedy aktualizacja nie będzie pasować do rewizji sprzętu, nie zostanie ona zainstalowana a my zostaniemy o tym poinformowani w dość przejrzysty sposób co poszlo nie tak:
+W przypadku kiedy aktualizacja nie będzie pasować do rewizji sprzętu, nie zostanie ona zainstalowana a my zostaniemy o tym poinformowani co poszło nie tak:
 ![image-title](/assets/images/SWUpdate_hwrevision.png)
 
 
-## Aktualizacje pelnego obrazu systemu
-Kolejną strategią aktualizacji jest aktualizacja nie pojedyńczego pliku czy aplikacji a całego systemu. Dostarczając pełen obraz systemu nie musimy sie martwić spójnością oprogramowania ponieważ dostarczamy oprogramowanie w danej konfiguracji ktora została przez Nas wcześniej przetestowana. Kolejna zaletą jest to, że jeśli Nasza aktualizacja się nie uda, albo co gorsza zabraknie zasilania w samym srodku aktualizacji mamy dostępne mechanizmy, ktore pomogą nam wyjść z opresji. Jej najwiekszą wadą jest rozmiar przesyłanej paczki. Może być to szczególnie problemem kiedy mamy ograniczone mozliwosci w zakresie transferu danych. To podejście wymaga od Nas trochę więcej wiedzy (bootloader itp), pracy oraz czasu.
+## Aktualizacje pełnego obrazu systemu
+Kolejną strategią aktualizacji jest aktualizacja nie pojedyńczego pliku czy aplikacji, a całego systemu. Dostarczając pełen obraz systemu nie musimy się martwić spójnością oprogramowania ponieważ dostarczamy oprogramowanie w danej konfiguracji ktora została przez Nas wcześniej przetestowana. Kolejna zaletą jest to, że jeśli Nasza aktualizacja się nie uda, albo co gorsza zabraknie zasilania w samym środku aktualizacji mamy dostępne mechanizmy, ktore pomogą nam wyjść z opresji. Jej największą wadą jest rozmiar przesyłanej paczki. Może być to szczególnie problemem kiedy mamy ograniczone możliwości w zakresie transferu danych. To podejście wymaga od Nas trochę więcej wiedzy (bootloader itp), pracy oraz czasu.
 
 Możemy wyrożnić tutaj trzy różne podejścia:
 - single copy
@@ -188,7 +188,7 @@ Zasada działania aktualizacji jest bardzo prosta. Urządzenie odpytuje się o d
 
 Tym sposobem doszliśmy do zalet tego podejścia. W przypadku kiedy nowo zapisany obraz systemu nie uruchamia się poprawnie zawsze możemy powrocić do poprzedniej wersji i zrobić ją aktywną. Kiedy podczas aktualizacji zabraknie nam zasilania urządzenie nadal będzie mogło korzystać ze 'starego' obrazu systemu i ponowić próbę aktualizacji. Plusem jest rownież to, że nie potrzebujemy żadnej interakcji z użytkownikiem ponieważ wszystkie operacje związane z aktualizacją mogą zostać wykonane w tle.
 
-Wadą rozwiązania jest ilość potrzebnego miejsca. Można powiedzieć, ze potrzebujemy dwa razy tyle miejsca na dysku jak w przypadku aktualizacji pojedynczej aplikacji. Pewną niedogodnoscią może być rownież to, ze wymagane jest ponowne uruchomienie urządzenia.
+Wadą rozwiązania jest ilość potrzebnego miejsca. Można powiedzieć, że potrzebujemy minimum dwa razy tyle miejsca na dysku jak w przypadku aktualizacji pojedynczej aplikacji na urządzeniu z jednym OS. Pewną niedogodnoscią może być rownież to, ze wymagane jest ponowne uruchomienie urządzenia.
 
 ### Single Copy
 Partcjonowanie urządzenia wygląda nastepujaco:
@@ -197,12 +197,12 @@ Partcjonowanie urządzenia wygląda nastepujaco:
 
 Podstawową rożnicą między startegią single copy a dual copy jest to, że w przypadku tej pierwszej używamy Recovery OS zamiast drugiej partycji z pełnym OS. Recovery OS jest to minimalny obraz systemu z którego można wystartować urządzenie oraz dostarcza możliwość zainstalowania aktualizacji.
 
-Aktualizacja można podzielić na następujace kroki. Urządzenie odpytuje się o dostępne aktualizacje i jeśli takową znajdzie pobiera obraz i zapisuje go na partycji danych. Nastepnie prosi uzytkownika o rozpoczęcie instalowania aktualizacji. W kolejnym kroku urządzenie zostaje uruchomione z Recovery OS, a pobrany wcześniej obraz nadpisuje Regular OS. Na koniec pozostaje uruchomić urządzenie ładujac podstawowy obraz systemu.
+Aktualizacja można podzielić na następujace kroki. Urządzenie odpytuje się o dostępne aktualizacje i jeśli takową znajdzie pobiera obraz i zapisuje go na partycji danych. Następnie prosi użytkownika o rozpoczęcie instalowania aktualizacji. W kolejnym kroku urządzenie zostaje uruchomione z Recovery OS, a pobrany wcześniej obraz nadpisuje Regular OS. Na koniec pozostaje uruchomić urządzenie ładujac podstawowy obraz systemu.
 
-Jest niestety kilka istotnych wad tego podejscia. Potrzebujemy sporo miejsca na partycji danych ponieważ obraz musi zostac gdzieś pobrany. Urządzenie przez czas instalowania aktualizacji pozostaje niaktywne. W razie nieudanej aktualizacji pozostajemy z urzadzeniem w trybie recovery, ale z dobrych stron możemy spróbowac zainstalowac aktualizacje jeszcze raz. Niestety nie mozemy pobrać obrazu jeszcze raz bo ten krok jest wykonanywany przy uzyciu podstawowego OS a nie recovery. W takim wypadku jeśli wcześniej pobrany obraz jest w jakiś sposob uszkodzony, bedziemy musieli podjąć się manualnej naprawy problemu.
+Jest niestety kilka istotnych wad tego podejscia. Potrzebujemy sporo miejsca na partycji danych ponieważ obraz musi zostać gdzieś pobrany. Urządzenie przez czas instalowania aktualizacji pozostaje niaktywne. W razie nieudanej aktualizacji pozostajemy z urządzeniem w trybie recovery, ale z dobrych stron możemy spróbowac zainstalowac aktualizacje jeszcze raz. Niestety nie mozemy pobrać obrazu jeszcze raz bo ten krok jest wykonanywany przy użyciu podstawowego OS a nie recovery. W takim wypadku jeśli wcześniej pobrany obraz jest w jakiś sposob uszkodzony, bedziemy musieli podjąć się manualnej naprawy problemu.
 
 ### Differential update
 Jest to rodzaj aktualizacji który rozwiązuje problem z jej wielkością. Polega no pobieraniu i zapisywaniu różnic między starym a nowym obrazem. Nie będę sie tutaj więcej rozpisywał ponieważ jest to dość obszerny temat. Po więcej informacji zapraszam na stronę: [link](https://sbabic.github.io/swupdate/delta-update.html)
 
-### Podsumowanie
-Framework SWUpdate pozwala Nam podejść do aktualizacji w prosty i usystemtyzowany sposób. Dostarcza on Nam wiele ciekawych możliwości o których byłoby warto jeszcze wspomnieć. Szczerze mówiąc, zagadnienia poruszone w artykule są tylko małym skrawkiem wszystkich możliwości frameworku. Warto byłoby wspomnieć, najlepiej na przykładzie, o aktualizacji z wykorzystaniem pełnego obrazu systemu. Kolejnym ciekawym zagadnieniem jest integracja z serwerem HawkBit (serwer aktualizacji). Integracja ta pozwala Nam stworzyć kompleksowy system do zarządzania aktualizacjami. Podsumowując, zostaje jeszcze dużo ciekawych zagadnień którym można by sie przyjrzeć bardziej szczegółowo. Jak już wcześniej wspomniałem, główną motywacją do napisania artykułu było jednak przedstawienie narzędzia SWUpdate oraz przybliżenie różnych strategii aktualizacji i myślę, że to jest DONE.
+## Podsumowanie
+Framework SWUpdate pozwala Nam podejść do aktualizacji w prosty i usystemtyzowany sposób. Dostarcza on Nam wiele ciekawych możliwości o których byłoby warto jeszcze wspomnieć. Szczerze mówiąc, zagadnienia poruszone w artykule są tylko małym skrawkiem wszystkich możliwości frameworku. Warto byłoby wspomnieć, najlepiej na przykładzie, o aktualizacji z wykorzystaniem pełnego obrazu systemu. Kolejnym ciekawym tematem jest integracja z serwerem HawkBit (serwer aktualizacji). Integracja ta pozwala Nam stworzyć kompleksowy system do zarządzania aktualizacjami. Podsumowując, zostaje jeszcze dużo ciekawych opcji którym można by się przyjrzeć bardziej szczegółowo, ale są to już tematy na kolejne artykuły.
