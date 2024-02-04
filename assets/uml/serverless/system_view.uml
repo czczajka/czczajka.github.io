@@ -1,0 +1,26 @@
+plantuml - general overview:
+@startuml
+skinparam rectangle {
+    BackgroundColor<<AWS Lambda>> LightBlue
+    BackgroundColor<<AWS EventBridge>> LightGreen
+    BackgroundColor<<AWS API Gateway>> LightYellow
+    BackgroundColor<<AWS DynamoDB>> LightCoral
+    BackgroundColor<<AWS S3>> LightPurple
+}
+
+rectangle "tracker-lambda" as TrackerExample <<AWS Lambda>>
+rectangle "tracker-handler" as TrackerHandler <<AWS Lambda>>
+rectangle "tracker-gateway" as TrackerGateway <<AWS Lambda>>
+rectangle "Rule for tracker-lambda" as EventBridge <<AWS EventBridge>>
+rectangle "HTTP GET route" as APIGateway <<AWS API Gateway>>
+database "DynamoDB" as DynamoDB <<AWS DynamoDB>>
+cloud "S3 Bucket" as S3 <<AWS S3>>
+
+EventBridge --> TrackerExample :  triggers every 2 minutes
+TrackerExample --> TrackerHandler : Invokes
+APIGateway --> TrackerGateway : Invokes
+TrackerExample --> DynamoDB : Uses
+TrackerHandler --> DynamoDB : Uses
+TrackerHandler --> S3 : Uses
+TrackerGateway --> S3 : Uses
+@enduml
