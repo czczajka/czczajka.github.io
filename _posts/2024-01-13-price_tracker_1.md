@@ -12,7 +12,7 @@ categories: jekyll update
 3. Architecture overview.
 4. Hands-on.
     - Using AWS Management Console.
-    - Using the provided script.
+    - Automated, with AWS CLI.
 5. Summury.
 
 ## A Few Words at the Beginning
@@ -57,39 +57,38 @@ In this hands-on section, choose between two approaches: manual setup of Price T
 - AWS Access  AWS Management Console: [link](https://aws.amazon.com/console/) (Way 1).
 - AWS CLI installed [link](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) and configured [link](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-quickstart.html) (Way 2)
 
-### Common steps (applicable for Way 1 and Way 2)
-1. Download the repository:
-{% highlight ruby %}
-git clone git@github.com:czczajka/price-tracker-serverless.git
-{% endhighlight %}
-2. Modify bucket name in app.config file. See note section below for more details.
-3. Build all necessary artifacts:
-{% highlight ruby %}
-./scripts/build.sh
-{% endhighlight %}
-
 #### Note
 The name of an Amazon S3 bucket must be unique across all existing bucket names in Amazon S3 not just within your own AWS account or a specific AWS region. It is a big chance that default name `price-tracker-plots` cannot be use. That's the reason why this name is customizable in app.config file.  
 
 ### Way 1: AWS Management Console
-See the video and reproduce the steps.
+1. Download the repository:
+```
+git clone git@github.com:czczajka/price-tracker-serverless.git
+```
+2. Modify bucket name in app.config file. See note section below for more details.
+3. Build all necessary artifacts:
+```
+./scripts/build.sh
+```
+4. See the video and reproduce the steps.
 
 #### Note
-It is possible to use any bucket name but it's important to keep name consistient in AWS environment and in app.config file. Additionally after changing `app.config` file, project should be re-builded.
+The name of an Amazon S3 bucket must be unique across all existing bucket names in Amazon S3 not just within your own AWS account or a specific AWS region. It is a big chance that default name `price-tracker-plots` cannot be use. That's the reason why this name is customizable in app.config file. It's important to keep name consistient in AWS environment and in app.config file. Additionally after changing `app.config` file, project should be re-builded.
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/nhlfUf5ZV1E?si=u27NIzqo6B4GAZME" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
+### Way 2: Automated, with AWS CLI (experimental)
+In our second method, we employ an experimental script that incorporates `dirty hacks`. This indicates the script is not yet mature and there is place for improvements i.e get rid of sleep commands.
 
-### Way 2: Automated (experimental)
 1. Run deployment script:
-{% highlight ruby %}
+```
 ./scripts/deploy_aws.sh
-{% endhighlight %}
-2. Run http endpoint and check if it is working correctly. It can take a couple of minutes before new data will be available (tracker Lambda is started every two minuets)
+```
+2. Run https endpoint (last line outputted from the script) and check if it is working correctly. It can take a couple of minutes before new data will be available (tracker Lambda is started every two minuets)
 3. Run cleanup script:
-{% highlight ruby %}
+```
 ./scripts/cleanup_aws.sh
-{% endhighlight %}
+```
 
 ## Summury
 The article "Price Tracker: A Practical Dive into Serverless Applications" offers a hands-on guide to building a serverless price tracker using AWS. It covers serverless computing fundamentals, AWS Cloud essentials, and a step-by-step walkthrough of creating the application, from setting up AWS services like Lambda and DynamoDB to deploying the final web app. The tutorial concludes with showcasing the web app interface, demonstrating the practical application of serverless technology in real-world scenarios.
