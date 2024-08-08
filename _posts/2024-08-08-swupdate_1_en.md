@@ -44,13 +44,13 @@ The disadvantage of the solution is the amount of space needed. We can say that 
 #### Single Copy
 Partitioning the device looks like this:
 
-| Bootloader | Base OS (active) | Recovery OS | Data partition |
+| Bootloader | Primary OS (active) | Recovery OS | Data partition |
 
 The main difference between the single copy and dual copy strategy is that in the case of the former, we use a Recovery OS instead of a second partition with a full OS. The Recovery OS is a minimal system image from which the device can be booted and provides the ability to install updates.
 
-Updates can be divided into the following steps. The device asks for available updates and if it finds one, it downloads the image and saves it to the data partition. Then it asks the user to start installing the update. In the next step, the device is booted with the Recovery OS, and the previously downloaded image overwrites the Regular OS. Finally, all that remains is to boot the device by loading the base system image.
+Updates can be divided into the following steps. The device asks for available updates and if it finds one, it downloads the image and saves it to the data partition. Then it asks the user to start installing the update. In the next step, the device is booted with the Recovery OS, and the previously downloaded image overwrites the Regular OS. Finally, all that remains is to boot the device by loading the primary system image.
 
-Unfortunately, there are a few drawbacks to this approach. We need a lot of space on the data partition because the image has to be downloaded somewhere. The device remains inactive while the update is being installed. In the event of an unsuccessful update, we remain with the device in recovery mode, but on the bright side, we can try to install the updates again. Unfortunately, we can't download the image again because this step is performed using the base OS and not recovery. In this case, if the previously downloaded image is somehow corrupted, we will have to attempt to manually repair the problem.
+Unfortunately, there are a few drawbacks to this approach. We need a lot of space on the data partition because the image has to be downloaded somewhere. The device remains inactive while the update is being installed. In the event of an unsuccessful update, we remain with the device in recovery mode, but on the bright side, we can try to install the updates again. Unfortunately, we can't download the image again because this step is performed using the primary OS and not recovery. In this case, if the previously downloaded image is somehow corrupted, we will have to attempt to manually repair the problem.
 
 #### Differential update
 This is a type of update that solves the problem with its size. It consists of downloading and saving the differences between the old and new image. I will not elaborate here because it is a large topic. For more information, please visit: [link](https://sbabic.github.io/swupdate/delta-update.html).
