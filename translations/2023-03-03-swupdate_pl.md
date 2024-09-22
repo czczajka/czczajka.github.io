@@ -1,9 +1,4 @@
----
-layout: post
-title:  "SWUpdate, czyli o aktualizacjach oprogramowania w świecie Embedded Linux"
-date:   2023-03-03 13:00:00 +0100
-categories: jekyll update
----
+# SWUpdate, czyli o aktualizacjach oprogramowania w świecie Embedded Linux
 
 ## Kilka słów na początek...
 W artykule chciałbym poruszyć temat zdalnych aktualizacji urządzeń Linux Embedded. Omówione zostaną podstawowe strategie aktualizacji oprogramowania oraz przedstawione zostanie narzędzie SWUpdate. W artykule znajdziemy przykłady prostych aktualizacji z wykorzystaniem płytki Raspberry Pi 4 oraz frameworku SWUpdate. Motywacją do napisania artykułu były dla mnie dotychczasowe doświadczenia związane z aktualizacjami urządzeń embedded, które często sprowadzały się do wykonaniu skryptów napisanych wcześniej przez programistów. Jako alternatywę do tego podejścia możemy użyć gotowego, dobrze przetestowanego narzędzia SWUpdate.

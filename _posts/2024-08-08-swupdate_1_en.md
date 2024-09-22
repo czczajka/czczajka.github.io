@@ -120,8 +120,11 @@ To complete the examples, we need a Linux device and a computer from which we wi
     // -w - mówi, że zostanie uruchomiony wbudowany webserwer
     // -document_root - ścieżka gdzie znajduje się `document root` webservera. Jeśli SWUpdate został zainstalowany za pomocą menadżera pakietów to trzeba pobrać repozytorium projektu, ponieważ w nim znajduje się wymagany "document root" dla webservera 
     ```
-7. As the last step to verify, we can launch the browser and enter the SWUpdate web interface page: http://IP-URZĄDZENIA:8080. [host]
-![image-title](/assets/images/swupdate/SWUpdate_start.png)
+7. As the last step to verify, we can launch the browser and enter the SWUpdate web interface page: http://DEVICE_IP:8080.
+<p align="center">
+  <img src="/assets/images/swupdate/SWUpdate_start.png" />
+</p>
+
 
 ### Example 1 - single application updates
 #### Update, step by step
@@ -163,7 +166,9 @@ sha256: hash of the new application version.
     3 blocks
     ```
 4. Updating the board using the web interface. This step requires launching a browser and launching the SWUpdate web interface. The address of my Raspberry Pi 4 board is as follows: http://raspberrypi.local:8080. Then, using the button on the page, we point to the update file: update-image-v1.swu [host]
-![image-title](/assets/images/swupdate/SWUpdate_success.png)
+<p align="center">
+  <img src="/assets/images/swupdate/SWUpdate_success.png" />
+</p>
 5. To verify that the application has been updated correctly, I connect to the board using `ssh` and check whether the contents of the application file have been replaced with the new version. Previously, the myApp file contained the text `myApp v0` [Raspbery Pi]
 ```
 pi@raspberrypi:~ $ sudo cat /usr/bin/myApp
@@ -195,7 +200,9 @@ software =
 }
 ```
 If the update is not compatible with the hardware revision, it will not be installed and will return an error message:
-![image-title](/assets/images/swupdate/SWUpdate_hwrevision.png)
+<p align="center">
+  <img src="/assets/images/swupdate/SWUpdate_hwrevision.png" />
+</p>
 
 ## Summary
 The SWUpdate framework allows you to approach updates in a simple and safe way. It is an extensive tool and has many other interesting options, such as updates using a full system image or integration with the HawkBit server, which I recommend familiarizing yourself with.
